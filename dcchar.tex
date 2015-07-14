@@ -1,0 +1,72 @@
+\documentclass[a4paper]{article}
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage[left=1cm]{geometry}
+\usepackage{float}
+\begin{document}
+\section{Charakterystyka przejściowa tranzysotra mosfet}
+\begin{equation}
+I_D = f(U_{GS})
+\end{equation}
+\begin{equation}
+V_{DS} = const.
+\end{equation}
+
+\begin{table} [H]
+\centering
+\begin{tabular} {|c|c|c|c|}
+\hline
+Dren (D) & SMU2 & V & CONST\\ \hline
+Źródło (S) & SMU3 & COM & CONST\\ \hline
+Bramka (G) & SMU4 & V & VAR1\\ \hline
+\end{tabular}
+\caption{Ustawienia kanałów w analizatorze półprzewodników HP4145B.}
+\end{table}
+
+\begin{verbatim}
+Parametry:
+V_DS - stałe
+I_DS_MAX
+V_GS_START
+V_GS_STOP
+V_GS_STEP
+\end{verbatim}
+Komendy GPIB:
+\begin{verbatim}
+...
+\end{verbatim}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5		CHARAKTERYSTYKA WYJŚCIOWA	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Charakterystyka wyjściowa tranzysotra mosfet}
+\begin{equation}
+I_D = f(V_{DS})
+\end{equation}
+\begin{equation}
+V_{GS} = const.
+\end{equation}
+
+\begin{table} [H]
+\centering
+\begin{tabular} {|c|c|c|c|}
+\hline
+Dren (D) & SMU2 & V & VAR1\\ \hline
+Źródło (S) & SMU3 & COM & CONST\\ \hline
+Bramka (G) & SMU4 & V & CONST\\ \hline
+\end{tabular}
+\caption{Ustawienia kanałów w analizatorze półprzewodników HP4145B.}
+\end{table}
+
+\begin{verbatim}
+Parametry:
+V_GS - stałe
+I_DS_MAX
+V_DS_START
+V_DS_STOP
+V_DS_STEP
+\end{verbatim}
+Komendy GPIB:
+\begin{verbatim}
+...
+\end{verbatim}
+
+\end{document}
