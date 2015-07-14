@@ -1,0 +1,23 @@
+# config. ini -> default parameters
+
+
+
+
+t1 = Transfer(I_DS_MAX, I_GS_MAX, filename, plot_title)
+t2 = ...
+
+# setters must be available only if I_DS_MAX / I_GS_MAX are initialized
+t1.set_VDS(value) # constant
+t1.set_VGS(start, stop, step) # exception ? (max 1001 steps)
+
+t1.setup()  # const / vars / display setup write to GPIB
+t1.meas()   # measure and save 
+
+# inne:
+# t1.get_settings()
+# t1.get_display_settings()
+# t1.set_display_settings() -> setup() sets by default VDS and VGS range
+
+
+
+#o1 = Output(...)
