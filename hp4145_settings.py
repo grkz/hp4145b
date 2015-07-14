@@ -2,6 +2,7 @@
 import visa
 import numpy as np
 import matplotlib.pyplot as plt
+import re
 rm = visa.ResourceManager()
 hp = rm.open_resource("GPIB0::15::INSTR") # hp4145 address
 hp.timeout = 50000
@@ -72,12 +73,10 @@ def get_data_transfer(V_GS_START, V_GS_STOP, V_GS_STEP, output_file):
         print "Getting data and plotting:",
         file = open(output_file, 'w')
         data = hp.query("DO 'IDS';")
-        data = data.rstrip("\n\r")
-        data = data.split(',')
+        filtered = re.findall("\w\s([+-eE.\d]+),", data)
         V_GS = []
-        I_DS = []
-        for x in data:
-                I_DS = I_DS + [float(x.lstrip("CN "))]
+        I_DS = [float(f) for f in filtered]
+        
         
         while V_GS_START <= V_GS_STOP:
                 V_GS += [V_GS_START]
