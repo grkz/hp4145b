@@ -1,0 +1,8 @@
+{
+    "V_GS_STEP": 0.004, 
+    "V_DS": 10, 
+    "V_GS_START": 1.5, 
+    "V_GS_STOP": 3.5, 
+    "I_GS_MAX": 0.0001, 
+    "I_DS_MAX": 0.1
+}
