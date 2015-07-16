@@ -15,7 +15,7 @@ class Analyzer:
     def __init__(self):
         self.rm = visa.ResourceManager()
         self.hp = self.rm.open_resource(address)
-        self.hp.timeout = 50000
+        self.hp.timeout = 300000
         self.test()
 
     def init(self, s):
@@ -62,7 +62,7 @@ class Transfer(Analyzer):
         print "Setting channels:",
         
         # integration time
-        self.hp.write("IT1;")
+        self.hp.write("IT2;")
         # MOSFET transfer characteristics
 
         # VD: SMU2: VDS / IDS, V / CONST
@@ -100,5 +100,69 @@ class Transfer(Analyzer):
         print "OK"
     def get_data(self):
         return self._get_data("DO 'IDS';", self.V_GS_START, self.V_GS_STOP, self.V_GS_STEP)
+    def get_settings(self):
+        return self.s
+
+class Output(Analyzer):
+    def __init__(self):
+        Analyzer.__init__(self)
+        print("HP4145B -> MOSFET output characteristics:")
+        print info
+        
+    def setup(self):
+        self.channels_setup()
+        self.const_setup()
+        self.var1_setup()
+        self.display_setup(0)   # I_DS_MIN - display setting
+    def channels_setup(self):
+        """ set channels for:
+        transfer DC characteristics
+        # SMU2 - Drain
+        # SMU3 - Source
+        # SMU4 - Gate
+        """
+        
+        print "Setting channels:",
+        
+        # integration time
+        self.hp.write("IT1;")
+        # MOSFET transfer characteristics
+
+        # VD: SMU2: VDS / IDS, V / VAR1
+        self.hp.write("DE,CH2,'VDS','IDS',1,1;")
+
+        # VS: SMU3: V3 / I3, COM / CONST
+        self.hp.write("DE,CH3,'V3','I3',3,3;")
+
+        # VG: SMU4: VGS / IG / V / CONST
+        self.hp.write("DE,CH4,'VGS','IG',1,3;")
+
+        print("OK")
+    
+    def const_setup(self):
+        """VG: SMU4: VGS / IG / V / CONST"""
+        print "Setting constants: ",
+        self.hp.write("SS VC 4," + str(self.V_GS) + "," + str(self.I_GS_MAX) + ";")
+        print "OK"
+    def var1_setup(self):
+        """VD: SMU2: VDS / IDS, V / VAR1"""
+        print "Setting variables: ",
+        if (abs(self.V_DS_STOP - self.V_DS_START) / self.V_DS_STEP) > 1001:
+            raise Exception("Error - Too small V_DS_STEP! (Max. 1001 steps)")
+        self.hp.write("SS VR 1," + str(self.V_DS_START) + "," + str(self.V_DS_STOP) + "," + str(self.V_DS_STEP) + "," + str(self.I_DS_MAX) + ";")
+        print "OK"
+    def display_setup(self, I_DS_MIN):
+        self.hp.write("SM;DM1;XN 'VDS',1," + str(self.V_DS_START) + "," + str(self.V_DS_STOP) + ";YB;YA 'IDS',1," + str(I_DS_MIN) + "," + str(self.I_DS_MAX) + ";")
+    def meas(self):
+        print "Measuring:",
+        self.hp.write("BC;")
+        self.hp.write("DR1;")
+        self.hp.write("MD ME1;")
+        self.hp.wait_for_srq()
+        self.hp.write("DR0;")
+        print "OK"
+    def get_data(self):
+        print self.hp.read_stb()
+        return self._get_data("DO 'IDS';", self.V_DS_START, self.V_DS_STOP, self.V_DS_STEP)
     def get_settings(self):
         return self.s
