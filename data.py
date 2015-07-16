@@ -7,24 +7,6 @@ import json
 data_dir = 'data'
 results_dir = 'results'
 
-def save_tr(filename, tr_obj):
-    v = tr_obj.V_GS_START
-    v_stop = tr_obj.V_GS_STOP
-    v_step = tr_obj.V_GS_STEP
-    
-    data = tr_obj.get_data_tr()
-    print "Pharsing data:",
-    filtered = re.findall("\w\s([eE.\d+-]+)", data)
-    V_GS = []
-    I_DS = [float(f) for f in filtered]
- 
-    while v <= v_stop:
-        V_GS.append(v)
-        v += v_step
-
-    pharsed_data = zip(V_GS, I_DS)
-    print "OK"
-    save(filename, pharsed_data, tr_obj.s)
     
     #print "IDS length: ", len(I_DS)
     #print "V_GS length: ", len(V_GS)

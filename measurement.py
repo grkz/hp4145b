@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 from modes import *
-from data import *
+import data
 
 # SMU2 - Drain
 # SMU3 - Source
@@ -21,9 +21,13 @@ settings = {
 tr = Transfer()
 
 for V_DS in [10,9,8]:
-    settings['V_DS'] = V_DS
-    tr.init(settings)
-    tr.setup()
-    tr.meas()
-    save_tr("2N7000_VDS" + str(V_DS), tr)
-    plot_tr("2N7000_VDS" + str(V_DS), "Ch-ka przejsciowa 2N7000", preview=False)
+	try:
+		settings['V_DS'] = V_DS
+		tr.init(settings)
+		tr.setup()
+		tr.meas()
+		data.save(tr.get_data(), tr.get_settings(), "2N7000_VDS" + str(V_DS))
+		data.plot_tr("2N7000_VDS" + str(V_DS), "Ch-ka przejsciowa 2N7000", preview=False)
+	except e:
+		print e
+

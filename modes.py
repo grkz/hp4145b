@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import visa
 import numpy as np
-import matplotlib.pyplot as plt
 import re
 
 info = """
@@ -18,24 +17,30 @@ class Analyzer:
         self.hp = self.rm.open_resource(address)
         self.hp.timeout = 50000
         self.test()
-        self.s = None
+
+    def init(self, s):
+		self.s = s
+      	for n, v in s.iteritems():
+			setattr(self, n, v)
         
-    def test(self):
+	def test(self):
         print "Test (ID):", self.hp.query("ID")
-        
-    def set_compliance(self, I_DS_MAX, I_GS_MAX):
-        self.I_DS_MAX = I_DS_MAX
-        self.I_GS_MAX = I_GS_MAX
+
+	def _get_data(self, command, start, stop, step):
+        print "Getting data:",
+        data = self.hp.query(command)
+        print "OK"
+		print "Parsing data:",
+		filtered = re.findall("\w\s([eE.\d+-]+)", data)
+
+		ys = [float(f) for f in filtered]
+		xs = np.arange(start, stop+step, step)
+
+		print "OK"
+		#print "ys:", len(ys), "xs:", len(xs)
+		return zip(xs, ys)
 
 class Transfer(Analyzer):
-    def init(self, s):
-	self.s = s
-        self.set_compliance(s['I_DS_MAX'], s['I_GS_MAX'])
-        
-        self.V_DS = s['V_DS']
-        self.V_GS_START = s['V_GS_START']
-        self.V_GS_STOP = s['V_GS_STOP']
-        self.V_GS_STEP = s['V_GS_STEP']
 
     def setup(self):
         self.channels_setup()
@@ -78,8 +83,7 @@ class Transfer(Analyzer):
         """VG: SMU4: VGS / IG / V / VAR1"""
         print "Setting variables: ",
         if (abs(self.V_GS_STOP - self.V_GS_START) / self.V_GS_STEP) > 1001:
-                print "Error - Too small V_GS_STEP! (Max. 1001 steps)"
-                return
+                raise Exception("Error - Too small V_GS_STEP! (Max. 1001 steps)")
         self.hp.write("SS VR 1," + str(self.V_GS_START) + "," + str(self.V_GS_STOP) + "," + str(self.V_GS_STEP) + "," + str(self.I_GS_MAX) + ";")
         print "OK"
     def display_setup(self, I_DS_MIN):
@@ -92,9 +96,6 @@ class Transfer(Analyzer):
             self.hp.wait_for_srq()
             self.hp.write("DR0;")
             print "OK"
-    def get_data_tr(self):
-        print "Getting data:",
-        data = self.hp.query("DO 'IDS';")
-        print "OK"
-        return data
+    def get_data(self):
+        return self._get_data("DO 'IDS';", self.V_GS_START, self.V_GS_STOP, self.V_GS_STEP)
 
