@@ -1,6 +1,6 @@
 {
     "V_GS_STEP": 0.4, 
-    "V_DS": 9, 
+    "V_DS": 7, 
     "V_GS_START": 1, 
     "V_GS_STOP": 4, 
     "I_GS_MAX": 0.0001, 

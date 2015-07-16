@@ -19,29 +19,33 @@ class Analyzer:
         self.test()
 
     def init(self, s):
-		self.s = s
+	self.s = s
       	for n, v in s.iteritems():
-			setattr(self, n, v)
+            setattr(self, n, v)
         
-	def test(self):
+    def test(self):
         print "Test (ID):", self.hp.query("ID")
 
-	def _get_data(self, command, start, stop, step):
+    def _get_data(self, command, start, stop, step):
         print "Getting data:",
         data = self.hp.query(command)
         print "OK"
-		print "Parsing data:",
-		filtered = re.findall("\w\s([eE.\d+-]+)", data)
+	print "Parsing data:",
+	filtered = re.findall("\w[\s+-]([eE.\d+-]+)", data)
 
-		ys = [float(f) for f in filtered]
-		xs = np.arange(start, stop+step, step)
+	ys = [float(f) for f in filtered]
+	xs = np.arange(start, stop+step, step)
 
-		print "OK"
-		#print "ys:", len(ys), "xs:", len(xs)
-		return zip(xs, ys)
+	print "OK"
+	print "ys:", len(ys), "xs:", len(xs)
+	return zip(xs, ys)
 
 class Transfer(Analyzer):
-
+    def __init__(self):
+        Analyzer.__init__(self)
+        print("HP4145B -> MOSFET transfer characteristics:")
+        print info
+        
     def setup(self):
         self.channels_setup()
         self.const_setup()
@@ -55,12 +59,10 @@ class Transfer(Analyzer):
         # SMU4 - Gate
         """
         
-        print("setting MOSFET transfer characteristics...")
-        print info
         print "Setting channels:",
         
         # integration time
-        self.hp.write("IT2;")
+        self.hp.write("IT1;")
         # MOSFET transfer characteristics
 
         # VD: SMU2: VDS / IDS, V / CONST
@@ -83,19 +85,20 @@ class Transfer(Analyzer):
         """VG: SMU4: VGS / IG / V / VAR1"""
         print "Setting variables: ",
         if (abs(self.V_GS_STOP - self.V_GS_START) / self.V_GS_STEP) > 1001:
-                raise Exception("Error - Too small V_GS_STEP! (Max. 1001 steps)")
+            raise Exception("Error - Too small V_GS_STEP! (Max. 1001 steps)")
         self.hp.write("SS VR 1," + str(self.V_GS_START) + "," + str(self.V_GS_STOP) + "," + str(self.V_GS_STEP) + "," + str(self.I_GS_MAX) + ";")
         print "OK"
     def display_setup(self, I_DS_MIN):
-            self.hp.write("SM;DM1;XN 'VGS',1," + str(self.V_GS_START) + "," + str(self.V_GS_STOP) + ";YB;YA 'IDS',1," + str(I_DS_MIN) + "," + str(self.I_DS_MAX) + ";")
+        self.hp.write("SM;DM1;XN 'VGS',1," + str(self.V_GS_START) + "," + str(self.V_GS_STOP) + ";YB;YA 'IDS',1," + str(I_DS_MIN) + "," + str(self.I_DS_MAX) + ";")
     def meas(self):
-            print "Measuring:",
-            self.hp.write("BC;")
-            self.hp.write("DR1;")
-            self.hp.write("MD ME1;")
-            self.hp.wait_for_srq()
-            self.hp.write("DR0;")
-            print "OK"
+        print "Measuring:",
+        self.hp.write("BC;")
+        self.hp.write("DR1;")
+        self.hp.write("MD ME1;")
+        self.hp.wait_for_srq()
+        self.hp.write("DR0;")
+        print "OK"
     def get_data(self):
         return self._get_data("DO 'IDS';", self.V_GS_START, self.V_GS_STOP, self.V_GS_STEP)
-
+    def get_settings(self):
+        return self.s

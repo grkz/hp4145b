@@ -27,13 +27,16 @@ def plot_tr(filename, title, save=True, preview=True):
     file = open(join(data_dir, filename + ".dat"))
     data = np.loadtxt(file)
     file.close()
-    plt.plot(data[:,0], data[:,1])
+    with open(join(data_dir, filename + ".json")) as file:
+        settings = json.load(file)
+    plt.plot(data[:,0], data[:,1], label='$V_{DS} = ' + str(settings['V_DS']) + '\ V$')
     plt.title(title)
-    plt.xlabel(r'$V_{GS} [V]$')
+    plt.legend()
+    plt.xlabel(r'$V_{GS}$ [V]')
     plt.ylabel(r'$I_{DS}$ [A]')
     plt.grid()
     if save == True:
-        print "Plotting to file (" + data_dir + "/" + results_dir + ".png):",
+        print "Plotting to file (" + results_dir + "/" + results_dir + ".png):",
         plt.savefig(join(results_dir, filename + ".png"))
         print "OK"
     if preview == True:
